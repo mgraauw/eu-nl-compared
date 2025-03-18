@@ -47,9 +47,11 @@
 | type_xtehr |  |
 | card._xtehr | 0..* |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* xtehr modelleert een aantal metagegevens (identifier etc.) expliciet, de zib niet
+* xtehr Procedure geeft in tekstuele omschrijving aan alleen voor heden en verleden te zijn, de zib gaat ook over de toekomst.
 
 ## EHDSProcedure.anatomicLocation
 
@@ -142,9 +144,10 @@
 | type_xtehr | CodeableConcept |
 | card._xtehr | 0..* |
 | binding_xtehr | {'strength': 'preferred', 'description': 'ICD-10*, SNOMED CT, Orphacode if rare disease is diagnosed'} |
+
 ### Comments
 
-
+* complication ontbreekt in de zib
 
 ## EHDSProcedure.date[x]
 
@@ -161,8 +164,7 @@
 | card._zib | 0..1 |
 | stereotype_zib | data |
 | id_zib | NL-CM:14.1.3 |
-| definition_zib | The end date (and if possible end time) of the procedure. A ‘vague’ date, such as only the year, is permitted. 
-The element offers the option to indicate the end of the period of a series of related procedures. The end date element is only used for a procedures that takes some time and is then always applied. If the procedure still continues, the value is left empty. For instantaneous or very short lasting procedures the element is omitted. |
+| definition_zib | The end date (and if possible end time) of the procedure. A ‘vague’ date, such as only the year, is permitted. <br/>The element offers the option to indicate the end of the period of a series of related procedures. The end date element is only used for a procedures that takes some time and is then always applied. If the procedure still continues, the value is left empty. For instantaneous or very short lasting procedures the element is omitted. |
 | definitioncode_zib |  |
 | id_xtehr | EHDSProcedure.date[x] |
 | path_xtehr | EHDSProcedure.date[x] |
@@ -171,9 +173,10 @@ The element offers the option to indicate the end of the period of a series of r
 | type_xtehr | dateTime |
 | card._xtehr | 0..1 |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* compliant
 
 ## EHDSProcedure.date[x]
 
@@ -200,9 +203,10 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | dateTime |
 | card._xtehr | 0..1 |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* compliant
 
 ## EHDSProcedure.description
 
@@ -228,9 +232,11 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | string |
 | card._xtehr | 0..1 |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* zib heeft geen 'description'
+* description in de xtehr is een tekstuele omschrijving, geen toelichting (zie ook 'note' hieronder)
 
 ## EHDSProcedure.deviceUsed
 
@@ -256,9 +262,10 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | EHDSDevice |
 | card._xtehr | 0..* |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* zib heeft geen 'deviceUsed'
 
 ## EHDSProcedure.focalDevice
 
@@ -284,9 +291,11 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | Reference |
 | card._xtehr | 0..* |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* definitie in Procedure is hetzelfde
+* maar MedischHulpmiddel en Device zelf niet helemaal
 
 ## EHDSProcedure.identifier
 
@@ -312,9 +321,10 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | Identifier |
 | card._xtehr | 0..* |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* identifier is in de zib impliciet, in xtehr expliciet gemodelleerd
 
 ## EHDSProcedure.location
 
@@ -340,9 +350,10 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | EHDSLocation |
 | card._xtehr | 0..* |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* xtehr staat meerdere locaties toe, zib max. 1
 
 ## EHDSProcedure.note
 
@@ -368,9 +379,10 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | string |
 | card._xtehr | 0..1 |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* de xtehr heeft een 'note', deze zib geen 'toelichting'
 
 ## EHDSProcedure.outcome
 
@@ -396,9 +408,10 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | CodeableConcept |
 | card._xtehr | 0..1 |
 | binding_xtehr | {'strength': 'preferred', 'description': 'SNOMED CT'} |
+
 ### Comments
 
-
+* de zib kent geen outcome'
 
 ## EHDSProcedure.performer
 
@@ -424,9 +437,10 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | Reference |
 | card._xtehr | 0..* |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* compliant
 
 ## EHDSProcedure.reason
 
@@ -452,9 +466,10 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | Reference |
 | card._xtehr | 0..* |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* compliant
 
 ## EHDSProcedure.subject
 
@@ -480,9 +495,10 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr | Reference |
 | card._xtehr | 1..1 |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* subject (Patient) is in xtehr expliect gemodelleerd, in zibs impliciet
 
 ## zib: Procedure.ProcedureMethod
 
@@ -508,9 +524,10 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr |  |
 | card._xtehr |  |
 | binding_xtehr |  |
+
 ### Comments
 
-
+* xtehr kent geen methode (wel een 'deviceUsed' maar dat is niet hetzelfde)
 
 ## zib: Procedure.Requester::HealthProfessional
 
@@ -536,5 +553,7 @@ The element offers the option to indicate the start of the period of a series of
 | type_xtehr |  |
 | card._xtehr |  |
 | binding_xtehr |  |
+
 ### Comments
 
+* xtehr kent geen aanvrager
