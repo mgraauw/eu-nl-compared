@@ -9,5 +9,5 @@
 |Condition| |[Condition](https://build.fhir.org/ig/Xt-EHR/xt-ehr-common/StructureDefinition-EHDSCondition.html)| | [Problem-v4.4](https://zibs.nl/wiki/Problem-v4.4(2020EN))| |
 |Device| |[Device](https://build.fhir.org/ig/Xt-EHR/xt-ehr-common/StructureDefinition-EHDSDevice.html)| |
 |Medication overview | | |
-|[Patient](./maps/xtehr2zibs/Patient.md)| | [Patient](https://build.fhir.org/ig/Xt-EHR/xt-ehr-common/StructureDefinition-EHDSPatient.html)| |[Patient-v3.2](https://zibs.nl/wiki/Patient-v3.2(2020EN)) |
+|[Patient](./maps/xtehr2zibs/Patient-comments.md)| | [Patient](https://build.fhir.org/ig/Xt-EHR/xt-ehr-common/StructureDefinition-EHDSPatient.html)| |[Patient-v3.2](https://zibs.nl/wiki/Patient-v3.2(2020EN)) |
 |[Procedure](./maps/xtehr2zibs/Procedure-comments.md)| |[Procedure](https://build.fhir.org/ig/Xt-EHR/xt-ehr-common/StructureDefinition-EHDSProcedure.html)| | [Procedure-v5.2](https://zibs.nl/wiki/Procedure-v5.2(2020EN)) |
