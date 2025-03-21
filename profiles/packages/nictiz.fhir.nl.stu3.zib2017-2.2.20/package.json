@@ -1,0 +1,27 @@
+{
+  "name": "nictiz.fhir.nl.stu3.zib2017",
+  "version": "2.2.20",
+  "description": "Nictiz NL package of FHIR STU3 conformance resources for HCIM Release 2017. Includes MedMij and HL7 NL.\r\n\r\nHCIMs: https://zibs.nl/wiki/HCIM_Release_2017(EN)",
+  "author": "nictiz",
+  "keywords": [
+    "nl",
+    "Nictiz",
+    "MedMij"
+  ],
+  "license": "CC0-1.0",
+  "title": "Nictiz FHIR NL STU3 Zib2017",
+  "fhirVersions": [
+    "3.0.1"
+  ],
+  "maintainers": [
+    {
+      "name": "Nictiz",
+      "email": "standaarden@medmij.nl"
+    }
+  ],
+  "url": "https://informatiestandaarden.nictiz.nl/wiki/Landingspagina_MedMij",
+  "jurisdiction": "urn:iso:std:iso:3166#NL",
+  "dependencies": {
+    "hl7.fhir.r3.core": "3.0.2"
+  }
+}
