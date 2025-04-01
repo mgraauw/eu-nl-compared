@@ -90,30 +90,41 @@ class Comparator:
         if "binding" in second_el:
             first_vs = self._getBoundValueSet(first_el)
             second_vs = self._getBoundValueSet(second_el)
-            print(self.path, first_vs, second_vs, first_el["binding"]["strength"], second_el["binding"]["strength"])
 
-            if self.path in self.exceptions:
-                if "valueSet" in self.exceptions[self.path]:
-                    known_self = self.exceptions[self.path]["valueSet"]["self"]
-                    known_other = self.exceptions[self.path]["valueSet"]["other"]
-                    if known_self == first_vs and known_other == second_vs:
-                        if "comment" in self.exceptions[self.path]["valueSet"]:
-                            self._finding(self.exceptions[self.path]["valueSet"]["comment"], "checked")
-                        # We don't have to flag on ValueSet differences anymore, but still on binding strengths, so we
-                        # simply set both ValueSets to empty
-                        first_vs = second_vs = ""
+            try:
+                known_self = self.exceptions[self.path]["valueSet"]["self"]
+                known_other = self.exceptions[self.path]["valueSet"]["other"]
+                if known_self == first_vs and known_other == second_vs:
+                    if "comment" in self.exceptions[self.path]["valueSet"]:
+                        if self.exceptions[self.path]["valueSet"]["compatibility"] == "compatible":
+                            level = "checked"
+                        elif self.exceptions[self.path]["valueSet"]["compatibility"] == "soft incompatible":
+                            level = "soft"
+                        else:
+                            level = "error"
+                        self._finding(self.exceptions[self.path]["valueSet"]["comment"], level)
+                    
+                    # We don't have to flag on ValueSet differences anymore, but still on binding strengths, so we
+                    # simply set both ValueSets to empty
+                    first_vs = second_vs = ""
+            except KeyError:
+                # Nothing in the exceptions file, let's continue
+                pass
 
             if first_vs == second_vs:
                 if second_el["binding"]["strength"] == "required" and first_el["binding"]["strength"] != "required":
                     self._finding(f"required binding in {self.second.name} is more restrictive than {first_el['binding']['strength']} binding in {self.first.name}.")
-                elif second_el["binding"]["strength"] == "extensible" and first_el["binding"]["strength"] not in ["extensbile", "required"]:
-                    self._finding(path, f"extensible ValueSet in {self.second.name} is more restrictive than {first_el['binding']['strength']} binding in {self.first.name}.")
+                elif second_el["binding"]["strength"] == "extensible" and first_el["binding"]["strength"] not in ["extensible", "required"]:
+                    self._finding(f"extensible ValueSet in {self.second.name} is more restrictive than {first_el['binding']['strength']} binding in {self.first.name}.")
                 else:
                     # We don't care much about other differences
                     pass
             if first_vs != second_vs:
                 if second_el["binding"]["strength"] == "required":
-                    self._finding(f"required Valueset in {self.second.name} differs from {self.first.name}. Manual check needed.", "manual")
+                    if first_el["binding"]["strength"] == "required":
+                        self._finding(f"required Valueset in {self.second.name} differs from required ValueSet in {self.first.name}. Manual check needed.", "manual")
+                    else:
+                        self._finding(f"required Valueset in {self.second.name} is more restrictive than {self.first.name}.")
                 elif second_el["binding"]["strength"] == "extensible":
                     self._finding(f"extensible Valueset in {self.second.name} differs from {self.first.name}. Manual check needed.", "manual")
                 else:
@@ -127,7 +138,7 @@ class Comparator:
             try:
                 known_self = set(self.exceptions[self.path]["type"]["self"])
                 known_other = set(self.exceptions[self.path]["type"]["other"])
-                if known_self == self_types and known_other == other_types:
+                if known_self == self_types and known_other == other_types and self.exceptions[self.path]["type"]["compatibility"] == "compatible":
                     return
             except KeyError:
                 # Nothing in exceptions about this, let's continue
@@ -149,6 +160,8 @@ class Comparator:
     def _finding(self, message, severity = "error"):
         if severity == "checked":
             symbol = "."
+        elif severity == "soft":
+            symbol = "~"
         elif severity == "manual":
             symbol = "?"
         else:
@@ -162,16 +175,18 @@ if __name__ == "__main__":
     zib_Problem2020 = Profile("zib2020", "zib-Problem")
     Condition_uv_ips = Profile("ips", "Condition-uv-ips")
     Condition_eu_eps = Profile("eps", "Condition-eu-eps", Condition_uv_ips)
-    for line in comparator.fits_in(zib_Problem2020, Condition_eu_eps):
-        print(line)
-    #with open(pathlib.Path(".") / "results" / "Condition.md", "w") as f:
-    #write(f, "# Condition resources")
-    #write(f, "## zib-Problem (2017) <-> Condition-uv-ips")
-    #write(f, *zib_Problem2017.fits_in(Condition_uv_ips, ignored_file))
-    #write(f)
-    #write(f, *Condition_uv_ips.fits_in(zib_Problem2017, ignored_file))
-    #write(f)
-    #write(f, "## zib-Problem (2020) <-> Condition-uv-ips")
-    #write(f, *zib_Problem2020.fits_in(Condition_uv_ips, ignored_file))
-    #write(f)
-    #write(f, *Condition_uv_ips.fits_in(zib_Problem2020, ignored_file))
+    with open(pathlib.Path(".") / "results" / "Condition.md", "w") as f:
+        f.write("# Condition resources\n")
+        f.write("## zib-Problem (2017) <-> Condition-uv-ips\n")
+        # for line in comparator.fits_in(zib_Problem2017, Condition_eu_eps):
+        #     f.write(line + "\n")
+        f.write("\n")
+        for line in comparator.fits_in(Condition_eu_eps, zib_Problem2017):
+            f.write(line + "\n")
+        # f.write("\n\n")
+        # f.write("## zib-Problem (2020) <-> Condition-uv-ips\n")
+        # for line in comparator.fits_in(zib_Problem2020, Condition_eu_eps):
+        #     f.write(line + "\n")
+        # f.write("\n")
+        # for line in comparator.fits_in(Condition_eu_eps, zib_Problem2020):
+        #     f.write(line + "\n")

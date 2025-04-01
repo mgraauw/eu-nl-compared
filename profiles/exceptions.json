@@ -1,32 +1,86 @@
 {
-    "zib-Problem (zib2017) fits in Condition-uv-ips (ips)": {
+    "zib-Problem (zib2017) fits in Condition-eu-eps (eps)": {
         "Condition.clinicalStatus": {
             "type": {
                 "self": ["code"],
-                "other": ["CodeableConcept"]
+                "other": ["CodeableConcept"],
+                "compatibility": "compatible",
+                "reason": "This stems from the difference between STU3 and R4"
             }
         },
         "Condition.verificationStatus": {
             "type": {
                 "self": ["code"],
-                "other": ["CodeableConcept"]
+                "other": ["CodeableConcept"],
+                "compatibility": "compatible",
+                "reason": "This stems from the difference between STU3 and R4"
             }
         },
         "Condition.category": {
             "valueSet": {
                 "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.1--20171231000000",
                 "other": "http://hl7.org/fhir/uv/ips/ValueSet/problem-type-uv-ips",
-                "comment": "The IPS codes are a refinement of the FHIR base codes, and the ValueSets are on different axes. They can co-exists without interfering"
+                "compatibility": "compatible",
+                "comment": "The IPS codes are a refinement of the FHIR base codes, and the ValueSets are on different axes. They can co-exists without interfering."
+            }
+        },
+        "Condition.code": {
+            "valueSet": {
+                "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.3--20171231000000",
+                "other": "http://hl7.org/fhir/uv/ips/ValueSet/problems-uv-ips",
+                "compatibility": "compatible",
+                "comment": "The EPS ValueSet is only preferred, so there's no problem if other codes are sent. In addition, the EPS ValueSet is more specific than the zib when it is about SNOMED, but for all intents and purposes they are probably compatible. The zib also recognizes other code systems though."
+            }
+        },
+        "Condition.bodySite": {
+            "valueSet": {
+                "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.5--20171231000000",
+                "other": "http://hl7.org/fhir/ValueSet/body-site",
+                "compatibility": "compatible",
+                "comment": "The extensible bound zib ValueSet includes a branch of SNOMED, while the preferred bound ValueSet on the EPS profile includes all of SNOMED."
             }
         }
     },
-    "Condition-uv-ips (ips) fits in zib-Problem (zib2017)": {
+    "Condition-eu-eps (eps) fits in zib-Problem (zib2017)": {
         "Condition.clinicalStatus": {
             "type": {
                 "self": ["CodeableConcept"],
-                "other": ["code"]
+                "other": ["code"],
+                "compatibility": "compatible",
+                "reason": "This stems from the difference between STU3 and R4"
+            }
+        },
+        "Condition.verificationStatus": {
+            "type": {
+                "self": ["CodeableConcept"],
+                "other": ["code"],
+                "compatibility": "compatible",
+                "reason": "This stems from the difference between STU3 and R4"
+            }
+        },
+        "Condition.category": {
+            "valueSet": {
+                "self": "http://hl7.org/fhir/uv/ips/ValueSet/problem-type-uv-ips",
+                "other": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.1--20171231000000",
+                "compatibility": "compatible",
+                "comment": "The IPS codes are a refinement of the FHIR base codes, and the ValueSets are on different axes. They can co-exists without interfering."
+            }
+        },
+        "Condition.code": {
+            "valueSet": {
+                "self": "http://hl7.org/fhir/uv/ips/ValueSet/problems-uv-ips",
+                "other": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.3--20171231000000",
+                "compatibility": "soft incompatible",
+                "comment": "The binding of the EPS ValueSet less restrictive than the zib, but the zib includes all of SNOMED plus several other concepts. In theory, an EPS compliant instance might use a code system not recognized by the zib that overlaps with a code from the extensible bound zib ValueSet, so strictly speaking such an instance is incompatible."
+            }
+        },
+        "Condition.bodySite": {
+            "valueSet": {
+                "self": "http://hl7.org/fhir/ValueSet/body-site",
+                "other": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.5--20171231000000",
+                "compatibility": "soft incompatible",
+                "comment": "The EPS ValueSet is bound preferrable and includes all of SNOMED, while the zib ValueSet expects (extensible binding) only codes from a branch of SNOMED."
             }
         }
     }
-
 }

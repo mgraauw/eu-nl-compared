@@ -57,7 +57,7 @@ For zib2020, there is one profile (or two, if you consider zib- and nl-core-):
 4. `Condition.bodySite` is restricted to 0..1.
 5. `Condition.note` is constrained to 0..1.
 
-Voor 2024, there are no profiles yet. Howver, the zib modeling becomes a lot complexer, which could result in a non-straightforwared mapping to FHIR:
+Fot 2024, there are no profiles yet. Howver, the zib modeling becomes a lot complexer, which could result in a non-straightforwared mapping to FHIR:
 
 1. The zibs separate the condition itself froms any diagnoses about it. A straightforward mapping of this model would result in multuple Conditions for the same "problem"; one containing the problem type (the diagnosis) and one containing things like the period present (the condition itself).
 2. Furthermore, a straightforward mapping could result in "diagnosis" Conditions that are in the past while the "condition" Condition is still active.
