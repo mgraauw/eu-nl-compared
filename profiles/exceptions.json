@@ -1,0 +1,32 @@
+{
+    "zib-Problem (zib2017) fits in Condition-uv-ips (ips)": {
+        "Condition.clinicalStatus": {
+            "type": {
+                "self": ["code"],
+                "other": ["CodeableConcept"]
+            }
+        },
+        "Condition.verificationStatus": {
+            "type": {
+                "self": ["code"],
+                "other": ["CodeableConcept"]
+            }
+        },
+        "Condition.category": {
+            "valueSet": {
+                "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.1--20171231000000",
+                "other": "http://hl7.org/fhir/uv/ips/ValueSet/problem-type-uv-ips",
+                "comment": "The IPS codes are a refinement of the FHIR base codes, and the ValueSets are on different axes. They can co-exists without interfering"
+            }
+        }
+    },
+    "Condition-uv-ips (ips) fits in zib-Problem (zib2017)": {
+        "Condition.clinicalStatus": {
+            "type": {
+                "self": ["CodeableConcept"],
+                "other": ["code"]
+            }
+        }
+    }
+
+}
