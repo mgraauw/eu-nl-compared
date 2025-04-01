@@ -3,12 +3,13 @@ import pathlib
 
 package_paths = {
     "ips": pathlib.Path(".") / "packages" / "hl7.fhir.uv.ips-1.1.0",
+    "eps": pathlib.Path(".") / "packages" / "hl7.fhir.eu.eps-0.0.1",
     "zib2017": pathlib.Path(".") / "packages" / "nictiz.fhir.nl.stu3.zib2017-2.2.20",
     "zib2020": pathlib.Path(".") / "packages" / "nictiz.fhir.nl.r4.zib2020-0.11.0-beta.1"
 }
 
 class Profile:
-    def __init__(self, package, profile_name):
+    def __init__(self, package, profile_name, base = None):
         self.package = package
         self.name = profile_name
 
@@ -16,9 +17,12 @@ class Profile:
         
         # Fish out interesting data: min and max cardinality and binding strengths
         self.of_interest = [el["path"] for el in content["differential"]["element"] if "min" in el or "max" in el or "binding" in el or "type" in el]
+        if base:
+            # Unify with the things marked as interesting by the base
+            self.of_interest = list(set(self.of_interest + base.of_interest))
 
     def read(self):
-        if self.package == "ips":
+        if self.package in ["ips", "eps"]:
             file = package_paths[self.package] / f"StructureDefinition-{self.name}.json"
         else:
             file = package_paths[self.package] / f"{self.name}.json"
@@ -99,14 +103,7 @@ class Comparator:
                         # simply set both ValueSets to empty
                         first_vs = second_vs = ""
 
-            if first_vs != second_vs:
-                if second_el["binding"]["strength"] == "required":
-                    self._finding(f"required Valueset in {self.second.name} differs from {self.first.name}. Manual check needed.", "manual")
-                elif second_el["binding"]["strength"] == "extensible":
-                    self._finding(f"extensible Valueset in {self.second.name} differs from {self.first.name}. Manual check needed.", "manual")
-                else:
-                    self._finding("differences in Valueset preferences. Manual check needed.", "manual")
-            else:
+            if first_vs == second_vs:
                 if second_el["binding"]["strength"] == "required" and first_el["binding"]["strength"] != "required":
                     self._finding(f"required binding in {self.second.name} is more restrictive than {first_el['binding']['strength']} binding in {self.first.name}.")
                 elif second_el["binding"]["strength"] == "extensible" and first_el["binding"]["strength"] not in ["extensbile", "required"]:
@@ -114,6 +111,13 @@ class Comparator:
                 else:
                     # We don't care much about other differences
                     pass
+            if first_vs != second_vs:
+                if second_el["binding"]["strength"] == "required":
+                    self._finding(f"required Valueset in {self.second.name} differs from {self.first.name}. Manual check needed.", "manual")
+                elif second_el["binding"]["strength"] == "extensible":
+                    self._finding(f"extensible Valueset in {self.second.name} differs from {self.first.name}. Manual check needed.", "manual")
+                else:
+                    self._finding("differences in Valueset preferences. Manual check needed.", "manual")
 
     def _checkTypes(self, first_el, second_el):
         if "type" in second_el:
@@ -157,7 +161,8 @@ if __name__ == "__main__":
     zib_Problem2017 = Profile("zib2017", "zib-Problem")
     zib_Problem2020 = Profile("zib2020", "zib-Problem")
     Condition_uv_ips = Profile("ips", "Condition-uv-ips")
-    for line in comparator.fits_in(zib_Problem2017, Condition_uv_ips):
+    Condition_eu_eps = Profile("eps", "Condition-eu-eps", Condition_uv_ips)
+    for line in comparator.fits_in(zib_Problem2020, Condition_eu_eps):
         print(line)
     #with open(pathlib.Path(".") / "results" / "Condition.md", "w") as f:
     #write(f, "# Condition resources")
