@@ -23,7 +23,6 @@ x zib-Problem (zib2020) does not seem to fit in Condition-eu-eps (eps)
 * x Condition.abatement[x]: Condition-eu-eps restricts types to {'dateTime'}, which is narrower than the allowed types in zib-Problem.
 
 x Condition-eu-eps (eps) does not seem to fit in zib-Problem (zib2020)
-* ~ Condition.category: Due to bindings strengths and slicing there's no actual conflict. However, the EPS profile aims for only Conditions categorized as 'problems' while the zib aims for broader use. In addition, the zib (profile) aims for categories coded in SNOMED while the EPS profile aims for HL7 or LOINC.
 * x Condition.code: required Valueset in zib-Problem is more restrictive than Condition-eu-eps.
 * x Condition.bodySite: restricted to 1 in zib-Problem but unrestricted in Condition-eu-eps.
 * x Condition.bodySite: required Valueset in zib-Problem is more restrictive than Condition-eu-eps.
