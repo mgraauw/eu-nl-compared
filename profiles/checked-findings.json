@@ -113,13 +113,93 @@
             }
         }
     },
-    "Condition-eu-eps (eps) in zib-Problem (zib2020)": {
-        "Condition.category": {
+    "nl-core-patient (zib2017) in Patient-eu-eps (eps)": {
+        "Patient.contact.relationship": {
             "valueSet": {
-                "self": "http://hl7.org/fhir/uv/ips/ValueSet/problem-type-uv-ips",
-                "other": "http://hl7.org/fhir/ValueSet/condition-category",
+                "self": "http://hl7.org/fhir/ValueSet/v2-0131",
+                "other": "http://hl7.org/fhir/ValueSet/patient-contactrelationship",
                 "compatibility": "soft incompatible",
-                "finding": "Due to bindings strengths and slicing there's no actual conflict. However, the EPS profile aims for only Conditions categorized as 'problems' while the zib aims for broader use. In addition, the zib (profile) aims for categories coded in SNOMED while the EPS profile aims for HL7 or LOINC."
+                "finding": "The zib binds two ValueSets, one of which partially overlaps semantically with the required ValueSet in the Patient-eu-eps profile."
+            }
+        }
+    },
+    "Patient-eu-eps (eps) in nl-core-patient (zib2017)": {
+        "Patient.maritalStatus": {
+            "valueSet": {
+                "self": "http://hl7.org/fhir/ValueSet/marital-status",
+                "other": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.7.9.1--20171231000000",
+                "compatibility": "compatible"
+            }
+        }
+    },
+    "zib-MedicalDevice (zib2017) in DeviceUseStatement-eu-eps (eps)": {
+        "DeviceUseStatement.bodySite": {
+            "valueSet": {
+                "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.10.1.2--20171231000000",
+                "other": "http://hl7.org/fhir/ValueSet/body-site",
+                "compatibility": "compatible"
+            }
+        }
+    },
+    "zib-MedicalDeviceProduct (zib2017) in Device-eu-eps (eps)": {
+        "Device.type": {
+            "valueSet": {
+                "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.10.1.1--20171231000000",
+                "other": "http://hl7.eu/fhir/eps/ValueSet/medical-devices-snomed-absent-unknown-eu-hdr",
+                "compatibility": "compatible"
+            }
+        }
+    },
+    "DeviceUseStatement-eu-eps (eps) in zib-MedicalDevice (zib2017)": {
+        "DeviceUseStatement.bodySite": {
+            "valueSet": {
+                "self": "http://hl7.org/fhir/ValueSet/body-site",
+                "other": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.10.1.2--20171231000000",
+                "compatibility": "soft incompatible",
+                "finding": "The zib requires SNOMED codes for all body sites defined in branch <442083009, but the EPS ValueSet is only preferred, so in theory overlapping codes from other systems might be used."
+            }
+        }
+    },
+    "Device-eu-eps (eps) in zib-MedicalDeviceProduct (zib2017)": {
+        "findings": [
+            {
+                "finding": "The IPS/EPS uses the combination of DeviceUseStatement and Device to explicitly state that there or no known devices, by introducing codes for this purpose on Device.type. This usage is not anticipated by the zib, but the profile doesn't prohibit this usage.",
+                "compatibility": "compatible"
+            }
+        ],
+        "Device.type": {
+            "valueSet": {
+                "self": "http://hl7.eu/fhir/eps/ValueSet/medical-devices-snomed-absent-unknown-eu-hdr",
+                "other": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.10.1.1--20171231000000",
+                "compatibility": "compatible"
+            }
+        }
+    },
+    "zib-MedicalDevice (zib2020) in DeviceUseStatement-eu-eps (eps)": {
+        "DeviceUseStatement.bodySite": {
+            "valueSet": {
+                "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.121.11.11--20200901000000",
+                "other": "http://hl7.org/fhir/ValueSet/body-site",
+                "compatibility": "compatible"
+            }
+        }
+    },
+    "zib-MedicalDevice.Product (zib2020) in Device-eu-eps (eps)": {
+        "Device.type": {
+            "valueSet": {
+                "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.10.1.1--20200901000000",
+                "other": "http://hl7.eu/fhir/eps/ValueSet/medical-devices-snomed-absent-unknown-eu-hdr",
+                "compatibility": "compatible"
+            }
+        }
+    },
+    "Device-eu-eps (eps) in zib-MedicalDevice.Product (zib2020)": {
+        "Device.type":  {
+            "valueSet": {
+                "self": "http://hl7.eu/fhir/eps/ValueSet/medical-devices-snomed-absent-unknown-eu-hdr",
+                "other": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.10.1.1--20200901000000",
+                "finding": "The IPS/EPS uses the combination of DeviceUseStatement and Device to explicitly state that there or no devices, by introducing codes for this purpose on Device.type. This usage is precluded by the zib, which restricts the ValueSet on Device.type.",
+                "compatibility": "incompatible"
             }
         }
     }

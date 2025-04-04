@@ -2,6 +2,8 @@ import enum
 import json
 import pathlib
 
+from dataclasses import dataclass
+
 """
 Comparator for FHIR profiles that allows you to identify if a profile "fits in" another profile. In other words, if an
 instance of profile A would be valid when validating with profile B.
@@ -91,6 +93,27 @@ class Compatibility(enum.StrEnum):
     soft_incompatible = "soft incompatible"
     manual = enum.auto()
 
+@dataclass
+class Finding:
+    id: str
+    message: str
+    compatibility: Compatibility = Compatibility.incompatible
+
+    def __repr__(self):
+        if self.compatibility == Compatibility.compatible:
+            symbol = "+"
+        elif self.compatibility == Compatibility.soft_incompatible:
+            symbol = "~"
+        elif self.compatibility == Compatibility.manual:
+            symbol = "?"
+        else:
+            symbol = "x"      
+
+        if self.id:
+            return f"{symbol} {self.id}: {self.message}"
+        else:
+            return f"{symbol} {self.message}"
+
 class Comparator:
     def __init__(self, checked_findings_file):
         self.checked_findings_file = pathlib.Path(".") / checked_findings_file
@@ -129,7 +152,7 @@ class Comparator:
             self._checkTypes(first_el, second_el)
 
         result = []
-        if len(self.findings):
+        if any(finding.compatibility != Compatibility.compatible for finding in self.findings):
             result.append(f"x {first.name} ({first.package}) does not seem to fit in {second.name} ({second.package})"),
             for finding in self.findings:
                 result.append(f"* {finding}")
@@ -233,16 +256,5 @@ class Comparator:
                     self._finding("Documented finding is outdated. Please re-check.", Compatibility.manual)
         return False
 
-    def _finding(self, message, severity: Compatibility = Compatibility.incompatible):
-        if severity == Compatibility.compatible:
-            symbol = "+"
-        elif severity == Compatibility.soft_incompatible:
-            symbol = "~"
-        elif severity == Compatibility.manual:
-            symbol = "?"
-        else:
-            symbol = "x"
-        if self.id:
-            self.findings.append(f"{symbol} {self.id}: {message}")
-        else:
-            self.findings.append(f"{symbol} {message}")
+    def _finding(self, message, compatibility: Compatibility = Compatibility.incompatible):
+        self.findings.append(Finding(self.id, message, compatibility))
