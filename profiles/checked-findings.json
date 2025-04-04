@@ -1,5 +1,5 @@
 {
-    "zib-Problem (zib2017) fits in Condition-eu-eps (eps)": {
+    "zib-Problem (zib2017) in Condition-eu-eps (eps)": {
         "Condition.clinicalStatus": {
             "type": {
                 "self": ["code"],
@@ -29,19 +29,18 @@
                 "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.3--20171231000000",
                 "other": "http://hl7.org/fhir/uv/ips/ValueSet/problems-uv-ips",
                 "compatibility": "compatible",
-                "finding": "The EPS ValueSet is only preferred, so there's no problem if other codes are sent. In addition, the EPS ValueSet is more specific than the zib when it is about SNOMED, but for all intents and purposes they are probably compatible. The zib also recognizes other code systems though."
+                "finding": "The zib defines more code systems while the EPS only defines SNOMED to be used. However, the EPS binding is only preferred, so it should handle other code systems without problem. In addition, the EPS ValueSet is more specific than the zib when it is about SNOMED, but for all intents and purposes they are probably compatible."
             }
         },
         "Condition.bodySite": {
             "valueSet": {
                 "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.5--20171231000000",
                 "other": "http://hl7.org/fhir/ValueSet/body-site",
-                "compatibility": "compatible",
-                "finding": "The extensible bound zib ValueSet includes a branch of SNOMED, while the preferred bound ValueSet on the EPS profile includes all of SNOMED."
+                "compatibility": "compatible"
             }
         }
     },
-    "Condition-eu-eps (eps) fits in zib-Problem (zib2017)": {
+    "Condition-eu-eps (eps) in zib-Problem (zib2017)": {
         "Condition.clinicalStatus": {
             "type": {
                 "self": ["CodeableConcept"],
@@ -70,8 +69,8 @@
             "valueSet": {
                 "self": "http://hl7.org/fhir/uv/ips/ValueSet/problems-uv-ips",
                 "other": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.3--20171231000000",
-                "compatibility": "soft incompatible",
-                "finding": "The binding of the EPS ValueSet less restrictive than the zib, but the zib includes all of SNOMED plus several other concepts. In theory, an EPS compliant instance might use a code system not recognized by the zib that overlaps with a code from the extensible bound zib ValueSet, so strictly speaking such an instance is incompatible."
+                "compatibility": "compatible",
+                "finding": "The binding of the EPS ValueSet is only preferred, while the zib has an extensible binding. An EPS compliant instance thus might use a code not in the zib ValueSet but overlapping with a code in the ValueSet, breaking the definition of extensible. However, the zib ValueSet includes all of SNOMED plus several other entire code systems, so this is highly hypothetical."
             }
         },
         "Condition.bodySite": {
@@ -79,7 +78,48 @@
                 "self": "http://hl7.org/fhir/ValueSet/body-site",
                 "other": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.5--20171231000000",
                 "compatibility": "soft incompatible",
-                "finding": "The EPS ValueSet is bound preferable and includes all of SNOMED, while the zib ValueSet expects (extensible binding) only codes from a branch of SNOMED."
+                "finding": "The zib expects (extensible binding) only codes from a branch of SNOMED, while the EPS allows for a wider use of SNOMED-codes and other code systems."
+            }
+        }
+    },
+    "zib-Problem (zib2020) in Condition-eu-eps (eps)": {
+        "findings": [
+            {
+                "finding": "The EPS profile is used only for (past or current) 'problems', while the zib has a broader aim (problems, complaints, diagnoses, findings, complications). This restriction isn't enforced though.",
+                "compatibility": "soft incompatible"
+            }
+        ],
+        "Condition.bodySite": {
+            "valueSet": {
+                "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.121.11.11--20200901000000",
+                "other": "http://hl7.org/fhir/ValueSet/body-site",
+                "compatibility": "compatible"
+            }
+        },
+        "Condition.category": {
+            "valueSet": {
+                "self": "http://hl7.org/fhir/ValueSet/condition-category",
+                "other": "http://hl7.org/fhir/uv/ips/ValueSet/problem-type-uv-ips",
+                "compatibility": "soft incompatible",
+                "finding": "Due to bindings strengths and slicing there's no actual conflict. However, the EPS profile aims for only Conditions categorized as 'problems' while the zib aims for broader use. In addition, the zib (profile) aims for categories coded in SNOMED while the EPS profile aims for HL7 or LOINC."
+            }
+        },
+        "Condition.code": {
+            "valueSet": {
+                "self": "http://decor.nictiz.nl/fhir/ValueSet/2.16.840.1.113883.2.4.3.11.60.40.2.5.1.3--20200901000000",
+                "other": "http://hl7.org/fhir/uv/ips/ValueSet/problems-uv-ips",
+                "compatibility": "compatible",
+                "finding": "The zib has a required binding, but the EPS only has a preferred binding, so a zib instance is compatible. The zib focuses on SNOMED and ICD-10, while the EPS only includes SNOMED."
+            }
+        }
+    },
+    "Condition-eu-eps (eps) in zib-Problem (zib2020)": {
+        "Condition.category": {
+            "valueSet": {
+                "self": "http://hl7.org/fhir/uv/ips/ValueSet/problem-type-uv-ips",
+                "other": "http://hl7.org/fhir/ValueSet/condition-category",
+                "compatibility": "soft incompatible",
+                "finding": "Due to bindings strengths and slicing there's no actual conflict. However, the EPS profile aims for only Conditions categorized as 'problems' while the zib aims for broader use. In addition, the zib (profile) aims for categories coded in SNOMED while the EPS profile aims for HL7 or LOINC."
             }
         }
     }
