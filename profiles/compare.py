@@ -65,14 +65,14 @@ class Profile:
         content = self.read()
         
         # Fish out interesting data: min and max cardinality and binding strengths
-        self.of_interest = [el["path"] for el in content["differential"]["element"] if "min" in el or "max" in el or "binding" in el or "type" in el]
+        self.of_interest = [el["id"] for el in content["differential"]["element"] if "min" in el or "max" in el or "binding" in el or "type" in el]
         if base:
             # Unify with the things marked as interesting by the base
             unified = list(set(self.of_interest + base.of_interest))
             self.of_interest = []
             for el in self.read()["snapshot"]["element"]: # To put everything in the proper order again
-                if el["path"] in unified:
-                    self.of_interest.append(el["path"])
+                if el["id"] in unified:
+                    self.of_interest.append(el["id"])
 
     def read(self):
         if self.package in ["ips", "eps"]:
@@ -108,7 +108,7 @@ class Comparator:
 
         first_snap = first.read()["snapshot"]["element"]
         second_snap = second.read()["snapshot"]["element"]
-        self.path = None
+        self.id = None
         
         if "findings" in self.checked_findings:
             for finding in self.checked_findings["findings"]:
@@ -116,10 +116,10 @@ class Comparator:
 
         # If we want to know if we "fit in" the other, we have to look at the restrictions done by the other and see
         # if we're compatible. We don't need to look at our own restrictions
-        for self.path in second.of_interest:
+        for self.id in second.of_interest:
             try:
-                first_el = list(filter(lambda e: e["path"] == self.path, first_snap))[0]
-                second_el = list(filter(lambda e: e["path"] == self.path, second_snap))[0]
+                first_el = list(filter(lambda e: e["id"] == self.id, first_snap))[0]
+                second_el = list(filter(lambda e: e["id"] == self.id, second_snap))[0]
             except IndexError:
                 # Happens when we have extensions. Need to look into this
                 continue
@@ -210,9 +210,9 @@ class Comparator:
           compatibility level.
         """
 
-        if self.path in self.checked_findings:
-            if key in self.checked_findings[self.path]:
-                ex = self.checked_findings[self.path][key]
+        if self.id in self.checked_findings:
+            if key in self.checked_findings[self.id]:
+                ex = self.checked_findings[self.id][key]
                 compatibility = Compatibility.incompatible if "compatibility" not in ex else Compatibility(ex["compatibility"])
                 
                 self_value = ex["self"]
@@ -242,7 +242,7 @@ class Comparator:
             symbol = "?"
         else:
             symbol = "x"
-        if self.path:
-            self.findings.append(f"{symbol} {self.path}: {message}")
+        if self.id:
+            self.findings.append(f"{symbol} {self.id}: {message}")
         else:
             self.findings.append(f"{symbol} {message}")
