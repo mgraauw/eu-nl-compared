@@ -2,6 +2,54 @@ import enum
 import json
 import pathlib
 
+"""
+Comparator for FHIR profiles that allows you to identify if a profile "fits in" another profile. In other words, if an
+instance of profile A would be valid when validating with profile B.
+
+The Comparator.fits_in(first, second) method will take two Profile class instances as parameters, and will check for
+all restrictions in second if there are similar restrictions in first. If the same element is more permissive in first,
+first will not fit in second on that aspect and an issue is flagged. For ValueSet bindings, no judgement can be made
+and a manual inspection is needed.
+
+For manual inspection, findings can be documented using a json file, which can be passed to the constructor of the
+Comparator class. The structure should be:
+{
+    "[profile A] in [profile B]": {
+        "[path]": {
+            "[type, valueSet or strength]": {
+                "self": "[the value in profile A]",
+                "other": "[the value in profile B]",
+                "compatibility": "[see below]",
+                "finding": "[optional text string describing the situation]"
+            }
+        }
+        "findings": [
+            {
+                "finding": "[a general remark about differences in the profiles]"
+                "compatibility": "[see below]"
+            }
+        ]
+    }
+}
+
+The values in "self" and "other" are explicitly documented so that the tool can detect if anything has changed since a
+previous inspection. For "compatibility", the following options are available:
+
+- "compatible": Upon inspection, there is no problem for all intents and purposes. If no "finding" is defined, the
+  issue is suppressed altogether.
+- "soft incompatible": An instance of profile A will validate against profile B, but there is friction in the intention
+  of both profiles.
+- "incompatible": Upon inspection, it turns out that the two elements are not compatible.
+
+Limitations:
+- The tool only checks on restrictions on type, cardinality, valueSet binding and binding strength.
+- It cannot inspect terminology, it can only inspect canonicals of bound ValueSets. If the _content_ of a ValueSet
+  changes in between checks while the canonical stays the same, it will go unnoticed by the tool.
+- The tool doesn't check for additions of extensions etc., only for restrictions.
+- The tool doesn't resolve base definitions of profiles. Another Profile class instance should be passed as the base
+  parameter if there's a base profile to consider.
+"""
+
 package_paths = {
     "ips": pathlib.Path(".") / "packages" / "hl7.fhir.uv.ips-1.1.0",
     "eps": pathlib.Path(".") / "packages" / "hl7.fhir.eu.eps-0.0.1",
@@ -20,7 +68,11 @@ class Profile:
         self.of_interest = [el["path"] for el in content["differential"]["element"] if "min" in el or "max" in el or "binding" in el or "type" in el]
         if base:
             # Unify with the things marked as interesting by the base
-            self.of_interest = list(set(self.of_interest + base.of_interest))
+            unified = list(set(self.of_interest + base.of_interest))
+            self.of_interest = []
+            for el in self.read()["snapshot"]["element"]: # To put everything in the proper order again
+                if el["path"] in unified:
+                    self.of_interest.append(el["path"])
 
     def read(self):
         if self.package in ["ips", "eps"]:
@@ -50,13 +102,18 @@ class Comparator:
         self.findings = []
         try:
             with open(self.checked_findings_file) as f:
-                self.checked_findings = json.load(f)[f"{first.name} ({first.package}) fits in {second.name} ({second.package})"]
+                self.checked_findings = json.load(f)[f"{first.name} ({first.package}) in {second.name} ({second.package})"]
         except KeyError:
             self.checked_findings = {}
 
         first_snap = first.read()["snapshot"]["element"]
         second_snap = second.read()["snapshot"]["element"]
+        self.path = None
         
+        if "findings" in self.checked_findings:
+            for finding in self.checked_findings["findings"]:
+                self._finding(finding["finding"], Compatibility.incompatible if "compatibility" not in finding else Compatibility(finding["compatibility"]))
+
         # If we want to know if we "fit in" the other, we have to look at the restrictions done by the other and see
         # if we're compatible. We don't need to look at our own restrictions
         for self.path in second.of_interest:
@@ -185,27 +242,7 @@ class Comparator:
             symbol = "?"
         else:
             symbol = "x"
-        self.findings.append(f"{symbol} {self.path}: {message}")
-
-if __name__ == "__main__":
-    comparator = Comparator("checked-findings.json")
-
-    zib_Problem2017 = Profile("zib2017", "zib-Problem")
-    zib_Problem2020 = Profile("zib2020", "zib-Problem")
-    Condition_uv_ips = Profile("ips", "Condition-uv-ips")
-    Condition_eu_eps = Profile("eps", "Condition-eu-eps", Condition_uv_ips)
-    with open(pathlib.Path(".") / "results" / "Condition.md", "w") as f:
-        f.write("# Condition resources\n")
-        f.write("## zib-Problem (2017) <-> Condition-uv-ips\n")
-        for line in comparator.fits_in(zib_Problem2017, Condition_eu_eps):
-            f.write(line + "\n")
-        f.write("\n")
-        for line in comparator.fits_in(Condition_eu_eps, zib_Problem2017):
-            f.write(line + "\n")
-        # f.write("\n\n")
-        # f.write("## zib-Problem (2020) <-> Condition-uv-ips\n")
-        # for line in comparator.fits_in(zib_Problem2020, Condition_eu_eps):
-        #     f.write(line + "\n")
-        # f.write("\n")
-        # for line in comparator.fits_in(Condition_eu_eps, zib_Problem2020):
-        #     f.write(line + "\n")
+        if self.path:
+            self.findings.append(f"{symbol} {self.path}: {message}")
+        else:
+            self.findings.append(f"{symbol} {message}")
