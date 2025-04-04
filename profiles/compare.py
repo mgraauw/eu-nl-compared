@@ -1,3 +1,4 @@
+import enum
 import json
 import pathlib
 
@@ -32,9 +33,15 @@ class Profile:
 
         return content
 
+class Compatibility(enum.StrEnum):
+    compatible = enum.auto()
+    incompatible = enum.auto()
+    soft_incompatible = "soft incompatible"
+    manual = enum.auto()
+
 class Comparator:
-    def __init__(self, exceptions_file):
-        self.exceptions_file = pathlib.Path(".") / exceptions_file
+    def __init__(self, checked_findings_file):
+        self.checked_findings_file = pathlib.Path(".") / checked_findings_file
 
     def fits_in(self, first, second):
         self.first = first
@@ -42,10 +49,10 @@ class Comparator:
 
         self.findings = []
         try:
-            with open(self.exceptions_file) as f:
-                self.exceptions = json.load(f)[f"{first.name} ({first.package}) fits in {second.name} ({second.package})"]
+            with open(self.checked_findings_file) as f:
+                self.checked_findings = json.load(f)[f"{first.name} ({first.package}) fits in {second.name} ({second.package})"]
         except KeyError:
-            self.exceptions = {}
+            self.checked_findings = {}
 
         first_snap = first.read()["snapshot"]["element"]
         second_snap = second.read()["snapshot"]["element"]
@@ -87,67 +94,43 @@ class Comparator:
                     self._finding(f"restricted to {other_max} in {other_name} but to {self_max} in {self.first.name}.")
 
     def _checkBinding(self, first_el, second_el):
-        if "binding" in second_el:
-            first_vs = self._getBoundValueSet(first_el)
-            second_vs = self._getBoundValueSet(second_el)
+        if "binding" not in second_el:
+            return
 
-            try:
-                known_self = self.exceptions[self.path]["valueSet"]["self"]
-                known_other = self.exceptions[self.path]["valueSet"]["other"]
-                if known_self == first_vs and known_other == second_vs:
-                    if "comment" in self.exceptions[self.path]["valueSet"]:
-                        if self.exceptions[self.path]["valueSet"]["compatibility"] == "compatible":
-                            level = "checked"
-                        elif self.exceptions[self.path]["valueSet"]["compatibility"] == "soft incompatible":
-                            level = "soft"
-                        else:
-                            level = "error"
-                        self._finding(self.exceptions[self.path]["valueSet"]["comment"], level)
-                    
-                    # We don't have to flag on ValueSet differences anymore, but still on binding strengths, so we
-                    # simply set both ValueSets to empty
-                    first_vs = second_vs = ""
-            except KeyError:
-                # Nothing in the exceptions file, let's continue
+        first_vs = self._getBoundValueSet(first_el)
+        second_vs = self._getBoundValueSet(second_el)
+        vs_handled = self._isChecked("valueSet", first_vs, second_vs)
+        bs_handled = self._isChecked("strength", first_el["binding"]["strength"], second_el["binding"]["strength"])
+
+        if first_vs == second_vs and not bs_handled:
+            if second_el["binding"]["strength"] == "required" and first_el["binding"]["strength"] != "required":
+                self._finding(f"required binding in {self.second.name} is more restrictive than {first_el['binding']['strength']} binding in {self.first.name}.")
+            elif second_el["binding"]["strength"] == "extensible" and first_el["binding"]["strength"] not in ["extensible", "required"]:
+                self._finding(f"extensible binding in {self.second.name} is more restrictive than {first_el['binding']['strength']} binding in {self.first.name}.")
+            else:
+                # We don't care much about other differences
                 pass
-
-            if first_vs == second_vs:
-                if second_el["binding"]["strength"] == "required" and first_el["binding"]["strength"] != "required":
-                    self._finding(f"required binding in {self.second.name} is more restrictive than {first_el['binding']['strength']} binding in {self.first.name}.")
-                elif second_el["binding"]["strength"] == "extensible" and first_el["binding"]["strength"] not in ["extensible", "required"]:
-                    self._finding(f"extensible ValueSet in {self.second.name} is more restrictive than {first_el['binding']['strength']} binding in {self.first.name}.")
+        if first_vs != second_vs and not vs_handled:
+            if second_el["binding"]["strength"] == "required":
+                if first_el["binding"]["strength"] == "required":
+                    self._finding(f"required Valueset in {self.second.name} differs from required ValueSet in {self.first.name}. Manual check needed.", Compatibility.manual)
                 else:
-                    # We don't care much about other differences
-                    pass
-            if first_vs != second_vs:
-                if second_el["binding"]["strength"] == "required":
-                    if first_el["binding"]["strength"] == "required":
-                        self._finding(f"required Valueset in {self.second.name} differs from required ValueSet in {self.first.name}. Manual check needed.", "manual")
-                    else:
-                        self._finding(f"required Valueset in {self.second.name} is more restrictive than {self.first.name}.")
-                elif second_el["binding"]["strength"] == "extensible":
-                    self._finding(f"extensible Valueset in {self.second.name} differs from {self.first.name}. Manual check needed.", "manual")
-                else:
-                    self._finding("differences in Valueset preferences. Manual check needed.", "manual")
+                    self._finding(f"required Valueset in {self.second.name} is more restrictive than {self.first.name}.")
+            elif second_el["binding"]["strength"] == "extensible":
+                self._finding(f"extensible Valueset in {self.second.name} differs from {self.first.name}. Manual check needed.", Compatibility.manual)
+            else:
+                self._finding("differences in Valueset preferences. Manual check needed.", Compatibility.manual)
 
     def _checkTypes(self, first_el, second_el):
         if "type" in second_el:
             self_types = {t["code"] for t in first_el["type"] if "code" in t}
             other_types = {t["code"] for t in second_el["type"] if "code" in t}
 
-            try:
-                known_self = set(self.exceptions[self.path]["type"]["self"])
-                known_other = set(self.exceptions[self.path]["type"]["other"])
-                if known_self == self_types and known_other == other_types and self.exceptions[self.path]["type"]["compatibility"] == "compatible":
-                    return
-            except KeyError:
-                # Nothing in exceptions about this, let's continue
-                pass
-
-            if self_types > other_types:
-                self._finding(f"{self.second.name} restricts types to {other_types}, which is narrower than the allowed types in {self.first.name}.")
-            elif self_types.isdisjoint(other_types):
-                self._finding(f"{self.second.name} restricts types to {other_types}, while {self.first.name} restricts them to {self_types}.")
+            if not self._isChecked("type", self_types, other_types):
+                if self_types > other_types:
+                    self._finding(f"{self.second.name} restricts types to {other_types}, which is narrower than the allowed types in {self.first.name}.")
+                elif self_types.isdisjoint(other_types):
+                    self._finding(f"{self.second.name} restricts types to {other_types}, while {self.first.name} restricts them to {self_types}.")
 
     def _getBoundValueSet(self, snapshot_element):
         vs = None
@@ -157,19 +140,55 @@ class Comparator:
             vs = snapshot_element["binding"]["valueSet"]
         return vs.split("|")[0] # Cut of version number
 
-    def _finding(self, message, severity = "error"):
-        if severity == "checked":
-            symbol = "."
-        elif severity == "soft":
+    def _isChecked(self, key, first, second):
+        """
+        Check if the incompatibility is described in the checked findings file and act accordingly.
+        That is:
+        - if the supplied "first" and "second" match the values for "self" and "other" under the "key", the finding
+          is described.
+        - if they don't match, something has changed apparently and this is flagged.
+        - if they do match and "compatibility" is set to "compatible", then they are regarded compatible. If 
+          "compatibility" is absent, a hard incompatibility is assumed.
+        - if they are not compatible or if a "finding" is defined, a finding is is created with the proper
+          compatibility level.
+        """
+
+        if self.path in self.checked_findings:
+            if key in self.checked_findings[self.path]:
+                ex = self.checked_findings[self.path][key]
+                compatibility = Compatibility.incompatible if "compatibility" not in ex else Compatibility(ex["compatibility"])
+                
+                self_value = ex["self"]
+                other_value = ex["other"]
+                if type(self_value) == list: self_value = set(self_value)    # Comparison is done on sets so order doesn't matter
+                if type(other_value) == list: other_value = set(other_value)
+
+                if self_value == first and other_value == second:
+                    if "finding" in ex:
+                        self._finding(ex["finding"], compatibility)
+                    elif compatibility != Compatibility.compatible:
+                        self._finding("Documented incompatibility", compatibility)
+                    else:
+                        # Silently ignore documented compatibility without message
+                        pass
+                    return True
+                else:
+                    self._finding("Documented finding is outdated. Please re-check.", Compatibility.manual)
+        return False
+
+    def _finding(self, message, severity: Compatibility = Compatibility.incompatible):
+        if severity == Compatibility.compatible:
+            symbol = "+"
+        elif severity == Compatibility.soft_incompatible:
             symbol = "~"
-        elif severity == "manual":
+        elif severity == Compatibility.manual:
             symbol = "?"
         else:
             symbol = "x"
         self.findings.append(f"{symbol} {self.path}: {message}")
 
 if __name__ == "__main__":
-    comparator = Comparator("exceptions.json")
+    comparator = Comparator("checked-findings.json")
 
     zib_Problem2017 = Profile("zib2017", "zib-Problem")
     zib_Problem2020 = Profile("zib2020", "zib-Problem")
@@ -178,8 +197,8 @@ if __name__ == "__main__":
     with open(pathlib.Path(".") / "results" / "Condition.md", "w") as f:
         f.write("# Condition resources\n")
         f.write("## zib-Problem (2017) <-> Condition-uv-ips\n")
-        # for line in comparator.fits_in(zib_Problem2017, Condition_eu_eps):
-        #     f.write(line + "\n")
+        for line in comparator.fits_in(zib_Problem2017, Condition_eu_eps):
+            f.write(line + "\n")
         f.write("\n")
         for line in comparator.fits_in(Condition_eu_eps, zib_Problem2017):
             f.write(line + "\n")
