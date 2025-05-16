@@ -15,9 +15,9 @@
 | Patient.ContactInformation          |                                   |            |                 | 0..1        |               |
 | Patient.DateOfDeath                 |                                   | TS         |                 | 0..1        |               |
 | Patient.DeathIndicator              |                                   | BL         |                 | 1           |               |
-|                                     |                                   | CD         |                 | 0..1        |               |
+| Patient.GenderIdentity              |                                   | CD         |                 | 0..1        |               |
 | Patient.MultipleBirthIndicator      |                                   | BL         |                 | 1           |               |
-|                                     |                                   | INT        |                 | 0..1        |               |
+| Patient.MultipleBirthSequence       |                                   | INT        |                 | 0..1        |               |
 
 
 
@@ -372,14 +372,14 @@
 
 
 
-## zib: nan
+## zib: Patient.GenderIdentity
 
 ### Table
 
 | attribute | value |
 |---|---|
 | xtehr |  |
-| zib |  |
+| zib | Patient.GenderIdentity |
 | binding_xtehr |  |
 | card._xtehr |  |
 | card._zib | 0..1 |
@@ -426,14 +426,14 @@
 
 
 
-## zib: nan
+## zib: Patient.MultipleBirthSequence
 
 ### Table
 
 | attribute | value |
 |---|---|
 | xtehr |  |
-| zib |  |
+| zib | Patient.MultipleBirthSequence |
 | binding_xtehr |  |
 | card._xtehr |  |
 | card._zib | 0..1 |
