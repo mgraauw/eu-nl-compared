@@ -1,18 +1,25 @@
 # Comparison between XtEHR and zibs
 
-## Mappen
+## Deliverable
 
-* zibs2020: bevat de mappen
-  * downloads: de zibs zelf, dit zijn de Excels van zibs.nl gedownload
-  * mappable
-* zibs2024: bevat de mappen
-  * downloads: de zibs zelf, deze zijn met Excel (Data->from web) gedownload omdat de Excels nog niet op zibs.nl stonden
-  * mappable
-* maps met mappingen tussen zibs en logical models, deze worden met de hand gemaakt, voorlopig een mapping voor zowel zibs2020 als zibs2024
-* maps/xtehr2zibs: dit zijn de aangemaakte mappings in Excel en markdown
-* maps/xtehr2zibs2024: dito
+De analyses per bouwsteen zijn te vinden in de Markdown-bestanden `maps/xtehr2zibs/*-comment.md` en `maps/xtehr2zibs/*-comment.md`. Deze bestanden bevatten tabellen waarin per gegevensconcept in zowel de zib als Xt-EHR-model staat aangegeven:
 
-De 'mappable' Excels zijn allemaal gestandaardiseerd naar een gemeenschappelijk format met voor de zibs kolommen:
+* welke concepten met elkaar relateren
+* wat de kardinaliteit is
+* wat het datatype is
+
+Daaronder staat een kopje met "Comments" waarin bevindingen geplaatst worden.
+
+## Aanpak
+Dit tools in dit repo maken het mogelijk om voor een deels automatisch een vergelijking te maken tussen zibs (2020 en 2024) enerzijds en de Xt-EHR logical models anderzijds. Dit gaat in ieder geval om datatype en kardinaliteit per gegevenselement. Inhoud van terminologie of context rond gebruik zijn bij uitstek dingen die handmatig geanalyseerd moeten worden. De gegenereerde materialen kunnen hierbij helpen.
+
+### Zibs
+Als basis dienen de Excels van de zibs. Deze worden gedownload naar:
+
+* voor zib2020: `zibs2020/downloads`: dit zijn de Excels van zibs.nl gedownload
+* voor zib2020: `zibs2024/downloads`: deze zijn met Excel (Data->from web) gedownload omdat de Excels nog niet op zibs.nl stonden
+
+Voor elk van deze Excels wordt een "mappable" Excel gemaakt (via zib2020-2-map.py en zib2024-2-map.py), waarmee later de relatie met de Xt-EHR-modellen aangegeven kan worden. De 'mappable' komen respectievelijk in de folders `zibs2020/mappable` en `zibs2024/mappable`. Deze Excels zijn gestandaardiseerd naar een gemeenschappelijk format met voor de zibs kolommen:
 
 * name
 * path
@@ -22,7 +29,12 @@ De 'mappable' Excels zijn allemaal gestandaardiseerd naar een gemeenschappelijk 
 * definition
 * definitioncode
 
-en voor de XtEHR logical models:
+### Xt-EHR
+Voor Xt-EHR wordt iets soortgelijks gedaan. Als basis dienen de logical models. Deze worden gedownload naar de map `xtehr/downloads`. 
+
+Voor elk van deze logical models wordt eveneens een "mappable" Excel gemaakt (via xtehr2map.py), die in de folder `xtehr/mappable` terechtkomen.
+
+Voor de Xt-EHR logical models bevat de Excel de kolommen:
 
 * id
 * path
@@ -32,17 +44,24 @@ en voor de XtEHR logical models:
 * card.
 * binding
 
-Dit gemeenschappelijk formaat maakt het eenvoudiger de volgende mapping stappen te doen. Belangrijkste is **path** dit is een puntgescheiden path (naam.naam2.naam3) waarmee de mapping tussen zibs en logical models gemaakt wordt.
+### Relaties aanleggen tussen zibs en Xt-EHR
 
-In **maps** staat de met de hand gemaakte path-op-path mapping, dit is alleen een tussenstap in de conversie.
+Met de "mappable" Excels van de zibs aan de ene kant en Xt-EHR aan de andere kant, kan aangegeven worden hoe de twee modellen zich tot elkaar verhouden. Dit gemeenschappelijk formaat maakt het eenvoudiger de volgende mapping stappen te doen. Belangrijkste is **path** dit is een puntgescheiden path (naam.naam2.naam3) waarmee de mapping tussen zibs en logical models gemaakt wordt.
 
-In **xtehr2zibs** en **xtehr2zibs2024** staan de gegenereerde files:
+In `maps` staat de met de hand gemaakte path-op-path mapping.
+
+Deze inputs wordt vervolgens gebruikt voor het genereren van een aantal bestanden:
 
 * Excels voor wie die graag wil zien
 * dito CSV, wordt nu niet gebruikt maar vanuit Github worden deze netjes gerenderd als je naar die map gaat
 * markdown:
   * {file}.md is de gegenereerde mardown
   * {file}-comments.md is na genereren identiek aan de vorige maar dat is degene die met de hand aangepast kan worden om onder comments kopjes de bevindingen per item te noteren.
+
+Deze bestanden staan in resp. de mappen:
+
+* voor zib2020: `maps/xtehr2zibs`
+* voor zib2024: `maps/xtehr2zibs2024`
 
 ## Sources
 
