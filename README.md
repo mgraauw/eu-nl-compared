@@ -1,6 +1,6 @@
 # Outdated
 
-See:  for the current version.
+See: https://github.com/nictiz/eu-nl-compared for the current version.
 
 # Comparison between XtEHR and zibs
 
