@@ -1,3 +1,7 @@
+# Outdated
+
+See:  for the current version.
+
 # Comparison between XtEHR and zibs
 
 ## Deliverable
